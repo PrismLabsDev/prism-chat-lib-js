@@ -99,3 +99,13 @@ test("Public encrypt and decrypt", async (): Promise<void> => {
   expect(verification).toStrictEqual(true);
 });
 
+test("Uint8Array to Base64 encoding", async (): Promise<void> => {
+  const message: Uint8Array = new TextEncoder().encode("Hello World!");
+
+  const base64Encoded: string = await PrismUtil.Uint8ArrayEncodeBase64(message);
+
+  const uint8arrayDecoded: Uint8Array = await PrismUtil.Uint8ArrayDecodeBase64(base64Encoded);
+
+  expect(uint8arrayDecoded).toStrictEqual(message);
+});
+

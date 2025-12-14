@@ -247,3 +247,20 @@ export const Uint8ArrayUnpack = (packed: Uint8Array): Uint8Array[] => {
   return parts;
 };
 
+export const Uint8ArrayEncodeBase64 = async (arr: Uint8Array): Promise<string> => {
+  const sodium: Sodium = await sodiumReady;
+  return sodium.to_base64(
+    arr,
+    sodium.base64_variants.URLSAFE_NO_PADDING
+  );
+};
+
+
+export const Uint8ArrayDecodeBase64 = async (str: string): Promise<Uint8Array> => {
+  const sodium: Sodium = await sodiumReady;
+  return sodium.from_base64(
+    str,
+    sodium.base64_variants.URLSAFE_NO_PADDING
+  );
+};
+

@@ -391,6 +391,16 @@ const data: Uint8Array = Uint8ArrayPack(
 const parts: Uint8Array[] = Uint8ArrayUnpack(
   data: Uint8Array
 );
+
+// Encode a Uint8Array to base64 string URL safe without padding
+const data: string = Uint8ArrayEncodeBase64(
+  arr: Uint8Array
+);
+
+// Decode a base64 string URL safe without padding to Uint8Array
+const data: Uint8Array = Uint8ArrayDecodeBase64(
+  str: string
+);
 ```
 
 ## The Protocol

@@ -89,20 +89,41 @@ export const ratchetKey = async (
   );
 }
 
+// Generate a key used for symmetric encrypt
+export const createSymmetricKey = async (): Promise<{
+  nonce: Uint8Array,
+  key: Uint8Array
+}> => {
+  const sodium: Sodium = await sodiumReady;
+  return {
+    nonce: sodium.randombytes_buf(24),
+    key: sodium.crypto_aead_xchacha20poly1305_ietf_keygen(),
+  }
+}
+
 // Symmetric Encryption
 export const symmetricEncrypt = async (
   data: Uint8Array,
-  sessionTxKey: Uint8Array,
-  count: Uint8Array
+  key: Uint8Array,
+  nonce: Uint8Array | undefined = undefined,
+  count: Uint8Array | undefined = undefined,
 ): Promise<SymmetricEncryption> => {
   const sodium: Sodium = await sodiumReady;
-  const nonce = sodium.randombytes_buf(24);
+
+  if (count === undefined) {
+    count = new Uint8Array(0)
+  }
+
+  if (nonce === undefined) {
+    nonce = sodium.randombytes_buf(24);
+  }
+
   const cipher = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
     data,
     count,
     null,
     nonce,
-    sessionTxKey,
+    key,
   );
   return {
     cipher: cipher,
@@ -114,17 +135,22 @@ export const symmetricEncrypt = async (
 // Decrypt Symmetric Encryption
 export const symmetricDecrypt = async (
   cipher: Uint8Array,
-  sessionRxKey: Uint8Array,
+  key: Uint8Array,
   nonce: Uint8Array,
-  count: Uint8Array
+  count: Uint8Array | undefined = undefined,
 ): Promise<Uint8Array> => {
   const sodium: Sodium = await sodiumReady;
+
+  if (count === undefined) {
+    count = new Uint8Array(0)
+  }
+
   return sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
     null,
     cipher,
     count,
     nonce,
-    sessionRxKey
+    key
   );
 }
 

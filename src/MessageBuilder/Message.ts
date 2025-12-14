@@ -40,7 +40,7 @@ export default class Message {
 
     if (sessionStreamTx) {
       const countB: Uint8Array = new TextEncoder().encode(count.toString());
-      let symmetricEncrypt: SymmetricEncryption = await PrismUtil.symmetricEncrypt(encodedData, sessionStreamTx, countB);
+      let symmetricEncrypt: SymmetricEncryption = await PrismUtil.symmetricEncrypt(encodedData, sessionStreamTx, undefined, countB);
       return new EncryptedMessage(symmetricEncrypt.cipher, symmetricEncrypt.nonce, count, type);
     }
 

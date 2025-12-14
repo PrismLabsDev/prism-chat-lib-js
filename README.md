@@ -337,6 +337,12 @@ const ratchetedKey: Uint8Array = await ratchetKey(
   count: number
 );
 
+// Generate a key used for symmetric encrypt
+const {
+  nonce: Uint8Array,
+  key: Uint8Array
+} = await createSymmetricKey();
+
 // Symmetric encryption (Usually use session tx)
 const {
   cipher: Uint8Array,
@@ -345,7 +351,8 @@ const {
 } = await symmetricEncrypt(
   data: Uint8Array,
   key: Uint8Array,
-  count: Uint8Array
+  nonce: Uint8Array | undefined,
+  count: Uint8Array | undefined
 );
 
 // Symmetric decrypt (Usually use session rx)
@@ -353,7 +360,7 @@ const data: Uint8Array = await symmetricDecrypt(
   cipher: Uint8Array,
   key: Uint8Array,
   nonce: Uint8Array,
-  count: Uint8Array
+  count: Uint8Array | undefined
 );
 
 // Generate signature for data with identity secret key

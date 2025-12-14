@@ -56,11 +56,11 @@ test('Uint8Array serialization pack', async (): Promise<void> => {
   expect(messages).toStrictEqual(unpacked);
 });
 
-test("Symetric encrypt and decrypt", async (): Promise<void> => {
+test("Symmetric encrypt and decrypt", async (): Promise<void> => {
   // Alice encrypt
   const message: Uint8Array = new TextEncoder().encode("Hello World!");
   const count: Uint8Array = new TextEncoder().encode(aliceSession.tx_count.toString());
-  const symmetricEncryptionObj: SymmetricEncryption = await PrismUtil.symmetricEncrypt(message, aliceSession.tx, count);
+  const symmetricEncryptionObj: SymmetricEncryption = await PrismUtil.symmetricEncrypt(message, aliceSession.tx, undefined, count);
 
   // Bob decrypt
   const decrypted: Uint8Array = await PrismUtil.symmetricDecrypt(
@@ -107,5 +107,25 @@ test("Uint8Array to Base64 encoding", async (): Promise<void> => {
   const uint8arrayDecoded: Uint8Array = await PrismUtil.Uint8ArrayDecodeBase64(base64Encoded);
 
   expect(uint8arrayDecoded).toStrictEqual(message);
+});
+
+test("Symmetric key generation and encryption", async (): Promise<void> => {
+  const message: Uint8Array = new TextEncoder().encode("Hello World!");
+  const { nonce, key } = await PrismUtil.createSymmetricKey();
+
+  const encrypted = await PrismUtil.symmetricEncrypt(
+    message,
+    key,
+    nonce
+  );
+
+  const decrypted: Uint8Array = await PrismUtil.symmetricDecrypt(
+    encrypted.cipher,
+    key,
+    nonce
+  );
+
+  expect(decrypted).toStrictEqual(message);
+  expect(encrypted.nonce).toStrictEqual(nonce);
 });
 

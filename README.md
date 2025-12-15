@@ -146,12 +146,12 @@ import {
 
 // Create IC message payload
 const sessionPK: Uint8Array; // Known after SessionInit
-const packedIC: Uint8Array = PrismUtil.Uint8ArrayPack([
+const packedIC: Uint8Array = PrismUtil.pack([
   sessionPK,
-  new TextEncoder().encode("Alice"),
-  new TextEncoder().encode("Let's chat!"),
+  await PrismUtil.fromString("Alice"),
+  await PrismUtil.fromString("Let's chat!"),
 ]);
-const unpackedIC: Uint8Array[] = PrismUtil.Uint8ArrayUnpack(packedIC);
+const unpackedIC: Uint8Array[] = PrismUtil.unpack(packedIC);
 
 
 // Send and receive unencrypted message (ic & rc)
@@ -212,24 +212,24 @@ Note: Text (t) messages are not compound types, so packing is not required. You 
 // Examples of building default message types.
 
 // ic: Initial communication type
-const ic: Uint8Array = PrismUtil.Uint8ArrayPack([
-  sessionPK,                                                        // Generates session pk
-  new TextEncoder().encode("Alice"),                                // Name of user
-  new TextEncoder().encode("I want to make a session with you."),   // One time message
+const ic: Uint8Array = PrismUtil.pack([
+  sessionPK,                                                          // Generates session pk
+  await PrismUtil.fromString("Alice"),                                // Name of user
+  await PrismUtil.from String("I want to make a session with you."),  // One time message
 ]);
-const unpacked_ic: Uint8Array[] = PrismUtil.Uint8ArrayUnpack(ic);   // [sessionPK, name, message]
+const unpacked_ic: Uint8Array[] = PrismUtil.unpack(ic);               // [sessionPK, name, message]
 
 // rc: Response communication type
-const rc: Uint8Array = PrismUtil.Uint8ArrayPack([
-  sessionPK,                                                        // Generates session pk
-  new TextEncoder().encode("Bob"),                                  // Name of user
-  new TextEncoder().encode("I agree, lets make a session."),        // One time message
+const rc: Uint8Array = PrismUtil.pack([
+  sessionPK,                                                          // Generates session pk
+  await PrismUtil.fromString("Bob"),                                  // Name of user
+  await PrismUtil.fromString("I agree, lets make a session."),        // One time message
 ]);
-const unpacked_rc: Uint8Array[] = PrismUtil.Uint8ArrayUnpack(ic);   // [sessionPK, name, message]
+const unpacked_rc: Uint8Array[] = PrismUtil.unpack(ic);               // [sessionPK, name, message]
 
 // t: Text type (Not compound, no packing required)
-const t: Uint8Array = new TextEncoder().encode("Hey! Hows it going?");
-const unpacked_t: string = new TextDecoder().decode(t);             // "Hey! Hows it going?"
+const t: Uint8Array = await PrismUtil.fromString("Hey! Hows it going?");
+const unpacked_t: string = await PrismUtil.toString(t);               // "Hey! Hows it going?"
 ```
 
 ### Message builder
@@ -390,22 +390,32 @@ const data: Uint8Array = await publicDecrypt(
 );
 
 // Standard binary serialization method for joining multiple Uint8Array
-const data: Uint8Array = Uint8ArrayPack(
+const data: Uint8Array = pack(
   parts: Uint8Array[]
 );
 
 // Standard binary deserialization method for joined Uint8Array
-const parts: Uint8Array[] = Uint8ArrayUnpack(
+const parts: Uint8Array[] = unpack(
   data: Uint8Array
 );
 
+// Encode a Uint8Array to a string
+const data: string = toString(
+  arr: Uint8Array
+);
+
+// Encode a UTF-8 string to Uint8Array binary data
+const data: Uint8Array = fromString(
+  str: string
+);
+
 // Encode a Uint8Array to base64 string URL safe without padding
-const data: string = Uint8ArrayEncodeBase64(
+const data: string = toBase64(
   arr: Uint8Array
 );
 
 // Decode a base64 string URL safe without padding to Uint8Array
-const data: Uint8Array = Uint8ArrayDecodeBase64(
+const data: Uint8Array = fromBase64(
   str: string
 );
 ```

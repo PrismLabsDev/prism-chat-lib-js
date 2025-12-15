@@ -17,7 +17,7 @@ export default class Package {
   }
 
   public serialize(): Uint8Array {
-    return PrismUtil.Uint8ArrayPack([
+    return PrismUtil.pack([
       this.data,
       this.signature,
       this.senderIpk
@@ -25,7 +25,7 @@ export default class Package {
   }
 
   public static deserialize(serializedPackage: Uint8Array): Package {
-    const unpacked: Uint8Array[] = PrismUtil.Uint8ArrayUnpack(serializedPackage);
+    const unpacked: Uint8Array[] = PrismUtil.unpack(serializedPackage);
     return new Package(
       unpacked[0],
       unpacked[1],

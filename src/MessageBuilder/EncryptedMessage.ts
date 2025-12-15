@@ -26,25 +26,25 @@ export default class EncryptedMessage {
     this.timestamp = timestamp;
   }
 
-  public serialize(): Uint8Array {
+  public async serialize(): Promise<Uint8Array> {
     this.timestamp = Date.now();
-    return PrismUtil.Uint8ArrayPack([
+    return PrismUtil.pack([
       this.data,
       this.nonce,
-      new TextEncoder().encode(this.count.toString()),
-      new TextEncoder().encode(this.type),
-      new TextEncoder().encode(this.timestamp.toString()),
+      await PrismUtil.fromString(this.count.toString()),
+      await PrismUtil.fromString(this.type),
+      await PrismUtil.fromString(this.timestamp.toString())
     ]);
   }
 
-  public static deserialize(serializedEncryptedMessage: Uint8Array): EncryptedMessage {
-    const unpacked: Uint8Array[] = PrismUtil.Uint8ArrayUnpack(serializedEncryptedMessage);
+  public static async deserialize(serializedEncryptedMessage: Uint8Array): Promise<EncryptedMessage> {
+    const unpacked: Uint8Array[] = PrismUtil.unpack(serializedEncryptedMessage);
     return new EncryptedMessage(
       unpacked[0],
       unpacked[1],
-      Number(new TextDecoder().decode(unpacked[2])),
-      new TextDecoder().decode(unpacked[3]),
-      Number(new TextDecoder().decode(unpacked[4])),
+      Number(await PrismUtil.toString(unpacked[2])),
+      await PrismUtil.toString(unpacked[3]),
+      Number(await PrismUtil.toString(unpacked[4])),
     );
   }
 
@@ -54,17 +54,17 @@ export default class EncryptedMessage {
         this.data,
         sessionStreamRx,
         this.nonce,
-        new TextEncoder().encode(this.count.toString())
+        await PrismUtil.fromString(this.count.toString())
       );
-      return Message.deserialize(decrypted);
+      return await Message.deserialize(decrypted);
     }
 
-    return Message.deserialize(this.data);
+    return await Message.deserialize(this.data);
   }
 
   public async pack(senderIpk: Uint8Array, senderIsk: Uint8Array): Promise<Package> {
     this.timestamp = Date.now();
-    const serialized = this.serialize();
+    const serialized = await this.serialize();
     const signature: Uint8Array = await PrismUtil.sign(serialized, senderIsk);
     return new Package(serialized, signature, senderIpk);
   }

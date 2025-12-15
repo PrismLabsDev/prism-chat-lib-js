@@ -1,9 +1,3 @@
-
-import * as PrismUtil from "@/Util";
-import Message from "@/MessageBuilder/Message";
-import EncryptedMessage from "@/MessageBuilder/EncryptedMessage";
-import Package from "@/MessageBuilder/Package";
-import SealedPackage from "@/MessageBuilder/SealedPackage";
 import {
   type PersonalKeys,
   type PeerKeys,
@@ -12,6 +6,11 @@ import {
   type Layers,
   type ReceiveOpenPayload
 } from "@/types";
+import * as PrismUtil from "@/Util";
+import Message from "@/MessageBuilder/Message";
+import EncryptedMessage from "@/MessageBuilder/EncryptedMessage";
+import Package from "@/MessageBuilder/Package";
+import SealedPackage from "@/MessageBuilder/SealedPackage";
 
 export const createUser = async (
   Ipk: Uint8Array | undefined = undefined,
@@ -118,7 +117,7 @@ export const sendUnencrypted = async (
   data: Uint8Array
 }> => {
   // Message builder up
-  const message: Message = new Message(data);
+  const message: Message = await Message.create(data);
   const encryptedMessage: EncryptedMessage = await message.encrypt(type);
   const package_: Package = await encryptedMessage.pack(session.personalKeys.Ipk, session.personalKeys.Isk);
   const sealedPackage: SealedPackage = await package_.seal(session.peerKeys.Epk);
@@ -158,7 +157,7 @@ export const send = async (
   let derivedTxKey: Uint8Array = await PrismUtil.ratchetKey(session.tx, session.tx_count);
 
   // Message builder up
-  const message: Message = new Message(data);
+  const message: Message = await Message.create(data);
   const encryptedMessage: EncryptedMessage = await message.encrypt(type, derivedTxKey, session.tx_count);
   const package_: Package = await encryptedMessage.pack(session.personalKeys.Ipk, session.personalKeys.Isk);
   const sealedPackage: SealedPackage = await package_.seal(session.peerKeys.Epk);

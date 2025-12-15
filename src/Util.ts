@@ -1,6 +1,5 @@
-
-import { sodiumReady, type Sodium } from "@/Sodium";
-import { type KeyPair, type SessionKeyPair, type SymmetricEncryption } from "@/types";
+import { type Sodium, sodiumReady } from "@/Sodium";
+import type { KeyPair, SessionKeyPair, SymmetricEncryption } from "@/types";
 
 // Generate signing public private key (ed25519)
 export const createIdentityKeyPair = async (): Promise<KeyPair> => {
@@ -90,14 +89,44 @@ export const ratchetKey = async (
 }
 
 // Generate a key used for symmetric encrypt
-export const createSymmetricKey = async (): Promise<{
-  nonce: Uint8Array,
+export const createSymmetricKey = async (
+  password: string | undefined = undefined,
+  salt: Uint8Array | undefined = undefined,
+  nonce: Uint8Array | undefined = undefined
+): Promise<{
   key: Uint8Array
+  nonce: Uint8Array,
+  salt: Uint8Array
 }> => {
   const sodium: Sodium = await sodiumReady;
+
+  if (nonce === undefined) {
+    nonce = sodium.randombytes_buf(24)
+  }
+
+  if (salt === undefined) {
+    salt = sodium.randombytes_buf(16);
+  }
+
+  let key: Uint8Array;
+
+  if (password) {
+    key = sodium.crypto_pwhash(
+      sodium.crypto_aead_xchacha20poly1305_ietf_KEYBYTES,
+      sodium.from_string(password),
+      salt,
+      sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+      sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+      sodium.crypto_pwhash_ALG_DEFAULT
+    );
+  } else {
+    key = sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
+  }
+
   return {
-    nonce: sodium.randombytes_buf(24),
-    key: sodium.crypto_aead_xchacha20poly1305_ietf_keygen(),
+    key: key,
+    nonce: nonce,
+    salt: salt
   }
 }
 
@@ -226,7 +255,7 @@ const decodeLength = (bytes: Uint8Array): number => {
 };
 
 // Packs multiple Uint8Arrays with headers capped at 255 bytes
-export const Uint8ArrayPack = (parts: Uint8Array[]): Uint8Array => {
+export const pack = (parts: Uint8Array[]): Uint8Array => {
   const totalLength = parts.reduce((sum, p) => {
     const lenBytes = encodeLength(p.length);
     return sum + 1 + lenBytes.length + p.length;
@@ -248,7 +277,7 @@ export const Uint8ArrayPack = (parts: Uint8Array[]): Uint8Array => {
 };
 
 // Unpacks packed Uint8Arrays with header size <= 255
-export const Uint8ArrayUnpack = (packed: Uint8Array): Uint8Array[] => {
+export const unpack = (packed: Uint8Array): Uint8Array[] => {
   const parts: Uint8Array[] = [];
   let offset = 0;
 
@@ -273,7 +302,7 @@ export const Uint8ArrayUnpack = (packed: Uint8Array): Uint8Array[] => {
   return parts;
 };
 
-export const Uint8ArrayEncodeBase64 = async (arr: Uint8Array): Promise<string> => {
+export const toBase64 = async (arr: Uint8Array): Promise<string> => {
   const sodium: Sodium = await sodiumReady;
   return sodium.to_base64(
     arr,
@@ -281,12 +310,22 @@ export const Uint8ArrayEncodeBase64 = async (arr: Uint8Array): Promise<string> =
   );
 };
 
-
-export const Uint8ArrayDecodeBase64 = async (str: string): Promise<Uint8Array> => {
+export const fromBase64 = async (str: string): Promise<Uint8Array> => {
   const sodium: Sodium = await sodiumReady;
   return sodium.from_base64(
     str,
     sodium.base64_variants.URLSAFE_NO_PADDING
   );
+};
+
+export const toString = async (arr: Uint8Array): Promise<string> => {
+  const sodium: Sodium = await sodiumReady;
+  return sodium.to_string(arr);
+};
+
+
+export const fromString = async (str: string): Promise<Uint8Array> => {
+  const sodium: Sodium = await sodiumReady;
+  return sodium.from_string(str);
 };
 

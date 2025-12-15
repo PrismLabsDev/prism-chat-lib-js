@@ -1,11 +1,9 @@
-
+import type { PersonalKeys, Session } from "../src/types";
 import {
   send as PrismSend,
   receiveOpen as PrismReceiveOpen,
-  receiveDecrypt as PrismReceiveDecrypt,
-  type PersonalKeys,
-  type Session,
-} from "../src/index";
+  receiveDecrypt as PrismReceiveDecrypt
+} from "../src/Main";
 
 import * as TestHelper from "./helpers";
 
@@ -57,7 +55,7 @@ test("Send and Receive high level operations.", async (): Promise<void> => {
     data: receiveData
   } = await PrismReceiveDecrypt(receiveOpenData, bobSession);
 
-  expect(receiveLayer.message.strDecode()).toStrictEqual(messageText);
+  expect(await receiveLayer.message.strDecode()).toStrictEqual(messageText);
 });
 
 test("Send and Receive high level operations skip encryption layer (For IC & RC)", async (): Promise<void> => {
@@ -78,7 +76,7 @@ test("Send and Receive high level operations skip encryption layer (For IC & RC)
     data: receiveData
   } = await PrismReceiveDecrypt(receiveOpenData, bobSession);
 
-  expect(receiveLayer.message.strDecode()).toStrictEqual(messageText);
+  expect(await receiveLayer.message.strDecode()).toStrictEqual(messageText);
 });
 
 test("Send and Receive high level operations message stream.", async (): Promise<void> => {
@@ -137,9 +135,9 @@ test("Send and Receive high level operations message stream.", async (): Promise
   receiveSession3 ? bobSession = receiveSession3 : undefined;
 
 
-  expect(receiveLayer1.message.strDecode()).toStrictEqual(messages[0]);
-  expect(receiveLayer2.message.strDecode()).toStrictEqual(messages[1]);
-  expect(receiveLayer3.message.strDecode()).toStrictEqual(messages[2]);
+  expect(await receiveLayer1.message.strDecode()).toStrictEqual(messages[0]);
+  expect(await receiveLayer2.message.strDecode()).toStrictEqual(messages[1]);
+  expect(await receiveLayer3.message.strDecode()).toStrictEqual(messages[2]);
 });
 
 test("Send and Receive high level operations message stream skip encryption layer. (For IC & RC)", async (): Promise<void> => {
@@ -196,8 +194,8 @@ test("Send and Receive high level operations message stream skip encryption laye
   } = await PrismReceiveDecrypt(receiveOpen3, bobSession);
   receiveSession1 ? bobSession = receiveSession1 : undefined;
 
-  expect(receiveLayer1.message.strDecode()).toStrictEqual(messages[0]);
-  expect(receiveLayer2.message.strDecode()).toStrictEqual(messages[1]);
-  expect(receiveLayer3.message.strDecode()).toStrictEqual(messages[2]);
+  expect(await receiveLayer1.message.strDecode()).toStrictEqual(messages[0]);
+  expect(await receiveLayer2.message.strDecode()).toStrictEqual(messages[1]);
+  expect(await receiveLayer3.message.strDecode()).toStrictEqual(messages[2]);
 });
 

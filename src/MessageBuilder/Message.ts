@@ -1,45 +1,53 @@
 
 import * as PrismUtil from "@/Util";
 import EncryptedMessage from "@/MessageBuilder/EncryptedMessage"
-import { SymmetricEncryption } from "@/types";
+import type { SymmetricEncryption } from "@/types";
 
 export default class Message {
 
-  public readonly data: Uint8Array
+  public data: Uint8Array;
 
-  constructor(data: Uint8Array | string | object) {
+  constructor() {
+    this.data = new Uint8Array(0);
+  }
+
+  public static async create(data: Uint8Array | string | object): Promise<Message> {
+    const message = new Message();
+
     if (data instanceof Uint8Array) {
-      this.data = data;
+      message.data = data;
     } else if (typeof data === "string") {
-      this.data = new TextEncoder().encode(data);
+      message.data = await PrismUtil.fromString(data);
     } else if (data && typeof data === "object") {
-      this.data = new TextEncoder().encode(JSON.stringify(data));
+      message.data = await PrismUtil.fromString(JSON.stringify(data));
     } else {
       throw new TypeError("Unsupported input type");
     }
+
+    return message;
   }
 
-  public strDecode(): string {
-    return new TextDecoder().decode(this.data);
+  public async strDecode(): Promise<string> {
+    return await PrismUtil.toString(this.data);
   }
 
-  public objDecode(): object {
-    return JSON.parse(this.strDecode());
+  public async objDecode(): Promise<object> {
+    return JSON.parse(await this.strDecode());
   }
 
   public serialize(): Uint8Array {
     return this.data
   }
 
-  public static deserialize(serializedMessage: Uint8Array): Message {
-    return new Message(serializedMessage);
+  public static async deserialize(serializedMessage: Uint8Array): Promise<Message> {
+    return await Message.create(serializedMessage);
   }
 
   public async encrypt(type: string = "", sessionStreamTx: Uint8Array | undefined = undefined, count: number = 0): Promise<EncryptedMessage> {
     const encodedData: Uint8Array = this.serialize();
 
     if (sessionStreamTx) {
-      const countB: Uint8Array = new TextEncoder().encode(count.toString());
+      const countB: Uint8Array = await PrismUtil.fromString(count.toString());
       let symmetricEncrypt: SymmetricEncryption = await PrismUtil.symmetricEncrypt(encodedData, sessionStreamTx, undefined, countB);
       return new EncryptedMessage(symmetricEncrypt.cipher, symmetricEncrypt.nonce, count, type);
     }

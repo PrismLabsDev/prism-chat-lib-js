@@ -1,4 +1,3 @@
-
 import _sodium from "libsodium-wrappers-sumo";
 
 export type Sodium = typeof _sodium;

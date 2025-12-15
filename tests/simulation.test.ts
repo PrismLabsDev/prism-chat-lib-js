@@ -1,6 +1,7 @@
 
+import type { Session, PersonalKeys } from "../src/types";
+import * as PrismUtil from "../src/Util";
 import {
-  Util as PrismUtil,
   createUser as PrismCreateUser,
   createPeer as PrismCreatePeer,
   initializeSession as PrismInitializeSession,
@@ -10,9 +11,7 @@ import {
   sendUnencrypted as PrismSendUnencrypted,
   receiveOpen as PrismReceiveOpen,
   receiveDecrypt as PrismReceiveDecrypt,
-  Session,
-  type PersonalKeys,
-} from "../src/index";
+} from "../src/Main";
 
 import * as TestHelper from "./helpers";
 
@@ -72,7 +71,7 @@ test("Send & receive message.", async (): Promise<void> => {
 
   expect(aliceSession.tx_count).toEqual(1); // Verify the session was updated
   expect(receiveByAliceOpen.type).toEqual("m"); // Verify type is message
-  expect(receiveByAliceDecrypted.layer.message.strDecode()).toEqual(messageStr); // Verify message equals the input
+  expect(await receiveByAliceDecrypted.layer.message.strDecode()).toEqual(messageStr); // Verify message equals the input
 });
 
 test("Send & receive message unencrypted.", async (): Promise<void> => {
@@ -88,8 +87,8 @@ test("Send & receive message unencrypted.", async (): Promise<void> => {
   const receiveByAliceDecrypted = await PrismReceiveDecrypt(receiveByAliceOpen, bobSession);
 
   expect(receiveByAliceOpen.type).toEqual("m"); // Verify type is message
-  expect(new TextDecoder().decode(receiveByAliceOpen.data)).toEqual(messageStr); // Verify the Encrypted message data matches send message
-  expect(receiveByAliceDecrypted.layer.message.strDecode()).toEqual(messageStr); // Verify message decrypt is equal to sent message
+  expect(await PrismUtil.toString(receiveByAliceOpen.data)).toEqual(messageStr); // Verify the Encrypted message data matches send message
+  expect(await receiveByAliceDecrypted.layer.message.strDecode()).toEqual(messageStr); // Verify message decrypt is equal to sent message
 });
 
 test("Create shared session.", async (): Promise<void> => {
@@ -102,10 +101,10 @@ test("Create shared session.", async (): Promise<void> => {
   const alicePeer = await PrismCreatePeer(bob.Ipk);
   const aliceSessionInit = await PrismInitializeSession(alice, alicePeer);
 
-  const payloadIC: any = PrismUtil.Uint8ArrayPack([
+  const payloadIC: any = PrismUtil.pack([
     aliceSessionInit.pk,
-    new TextEncoder().encode("Alice"),
-    new TextEncoder().encode("Let's chat."),
+    await PrismUtil.fromString("Alice"),
+    await PrismUtil.fromString("Let's chat."),
   ]);
 
   const aliceSendIC = await PrismSendUnencrypted(
@@ -128,19 +127,19 @@ test("Create shared session.", async (): Promise<void> => {
   const bobReceiveICDecrypted = await PrismReceiveDecrypt(bobReceiveICOpen);
 
   // Read payload
-  const payloadReadIC = PrismUtil.Uint8ArrayUnpack(bobReceiveICDecrypted.data);
+  const payloadReadIC = PrismUtil.unpack(bobReceiveICDecrypted.data);
   expect(payloadReadIC[0]).toEqual(aliceSessionInit.pk);
-  expect(new TextDecoder().decode(payloadReadIC[1])).toEqual("Alice");
-  expect(new TextDecoder().decode(payloadReadIC[2])).toEqual("Let's chat.");
+  expect(await PrismUtil.toString(payloadReadIC[1])).toEqual("Alice");
+  expect(await PrismUtil.toString(payloadReadIC[2])).toEqual("Let's chat.");
 
   const bobPeer = await PrismCreatePeer(bobReceiveICDecrypted.sender);
   const bobSessionInit = await PrismInitializeSession(bob, bobPeer);
   bobSession = await PrismRecipientExchangeSession(bobSessionInit, payloadReadIC[0]); // Reset helper bobSession.
 
-  const payloadRC: any = PrismUtil.Uint8ArrayPack([
+  const payloadRC: any = PrismUtil.pack([
     bobSession.pk,
-    new TextEncoder().encode("Bob"),
-    new TextEncoder().encode("I Agree!"),
+    await PrismUtil.fromString("Bob"),
+    await PrismUtil.fromString("I Agree!"),
   ]);
 
   const bobSendRC = await PrismSendUnencrypted(
@@ -163,10 +162,10 @@ test("Create shared session.", async (): Promise<void> => {
   const aliceReceiveRCDecrypted = await PrismReceiveDecrypt(aliceReceiveRCOpen);
 
   // Read payload
-  const payloadReadRC = PrismUtil.Uint8ArrayUnpack(aliceReceiveRCDecrypted.data);
+  const payloadReadRC = PrismUtil.unpack(aliceReceiveRCDecrypted.data);
   expect(payloadReadRC[0]).toEqual(bobSessionInit.pk);
-  expect(new TextDecoder().decode(payloadReadRC[1])).toEqual("Bob");
-  expect(new TextDecoder().decode(payloadReadRC[2])).toEqual("I Agree!");
+  expect(await PrismUtil.toString(payloadReadRC[1])).toEqual("Bob");
+  expect(await PrismUtil.toString(payloadReadRC[2])).toEqual("I Agree!");
 
   aliceSession = await PrismSenderExchangeSession(aliceSessionInit, payloadReadRC[0]); // Reset helper aliceSession.
 

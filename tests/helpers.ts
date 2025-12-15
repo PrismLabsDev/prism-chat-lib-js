@@ -1,14 +1,11 @@
-
+import type { PersonalKeys, Session } from "../src/types";
 import {
   createUser as PrismCreateUser,
   createPeer as PrismCreatePeer,
   initializeSession as PrismInitializeSession,
   senderExchangeSession as PrismSenderExchangeSession,
   recipientExchangeSession as PrismRecipientExchangeSession,
-  type PersonalKeys,
-  type Session,
-} from "../src/index";
-
+} from "../src/Main";
 
 export const createUser = async (): Promise<PersonalKeys> => {
   return await PrismCreateUser();

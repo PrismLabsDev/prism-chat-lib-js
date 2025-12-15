@@ -1,9 +1,5 @@
-
-import {
-  MessageBuilder as PrismMB,
-  type PersonalKeys,
-  type Session,
-} from "../src/index";
+import type { PersonalKeys, Session } from "../src/types";
+import * as PrismMB from "../src/MessageBuilder";
 
 import * as TestHelper from "./helpers";
 
@@ -28,16 +24,16 @@ test("Message Up Down", async (): Promise<void> => {
   const messageText: string = "Hello World!";
 
   // Alice Send
-  const sendMessage: PrismMB.Message = new PrismMB.Message(messageText);
+  const sendMessage: PrismMB.Message = await PrismMB.Message.create(messageText);
 
-  expect(sendMessage.strDecode()).toStrictEqual(messageText);
+  expect(await sendMessage.strDecode()).toStrictEqual(messageText);
 });
 
 test("EncryptedMessage Up Down", async (): Promise<void> => {
   const messageText: string = "Hello World!";
 
   // Alice Send
-  const sendMessage: PrismMB.Message = new PrismMB.Message(messageText);
+  const sendMessage: PrismMB.Message = await PrismMB.Message.create(messageText);
   const sendEncryptedMessage: PrismMB.EncryptedMessage = await sendMessage.encrypt("a", aliceSession.tx, aliceSession.tx_count);
   const sendEncryptedMessageSerialized: Uint8Array = await sendEncryptedMessage.serialize();
 
@@ -45,14 +41,14 @@ test("EncryptedMessage Up Down", async (): Promise<void> => {
   const receiveEncryptedMessage: PrismMB.EncryptedMessage = await PrismMB.EncryptedMessage.deserialize(sendEncryptedMessageSerialized);
   const receiveMessage: PrismMB.Message = await receiveEncryptedMessage.decrypt(bobSession.rx);
 
-  expect(receiveMessage.strDecode()).toStrictEqual(messageText);
+  expect(await receiveMessage.strDecode()).toStrictEqual(messageText);
 });
 
 test("Package Up Down", async (): Promise<void> => {
   const messageText: string = "Hello World!";
 
   // Alice Send
-  const sendMessage: PrismMB.Message = new PrismMB.Message(messageText);
+  const sendMessage: PrismMB.Message = await PrismMB.Message.create(messageText);
   const sendEncryptedMessage: PrismMB.EncryptedMessage = await sendMessage.encrypt("a", aliceSession.tx, aliceSession.tx_count);
   const sendPackage: PrismMB.Package = await sendEncryptedMessage.pack(aliceSession.personalKeys.Ipk, aliceSession.personalKeys.Isk);
   const sendPackageSerialized: Uint8Array = await sendPackage.serialize();
@@ -62,14 +58,14 @@ test("Package Up Down", async (): Promise<void> => {
   const receiveEncryptedMessage: PrismMB.EncryptedMessage = await receivePackage.unpack();
   const receiveMessage: PrismMB.Message = await receiveEncryptedMessage.decrypt(bobSession.rx);
 
-  expect(receiveMessage.strDecode()).toStrictEqual(messageText);
+  expect(await receiveMessage.strDecode()).toStrictEqual(messageText);
 });
 
 test("SealedPackage Up Down", async (): Promise<void> => {
   const messageText: string = "Hello World!";
 
   // Alice Send
-  const sendMessage: PrismMB.Message = new PrismMB.Message(messageText);
+  const sendMessage: PrismMB.Message = await PrismMB.Message.create(messageText);
   const sendEncryptedMessage: PrismMB.EncryptedMessage = await sendMessage.encrypt("a", aliceSession.tx, aliceSession.tx_count);
   const sendPackage: PrismMB.Package = await sendEncryptedMessage.pack(aliceSession.personalKeys.Ipk, aliceSession.personalKeys.Isk);
   const sendSealedPackage: PrismMB.SealedPackage = await sendPackage.seal(aliceSession.peerKeys.Epk);
@@ -80,6 +76,6 @@ test("SealedPackage Up Down", async (): Promise<void> => {
   const receiveEncryptedMessage: PrismMB.EncryptedMessage = await receivePackage.unpack();
   const receiveMessage: PrismMB.Message = await receiveEncryptedMessage.decrypt(bobSession.rx);
 
-  expect(receiveMessage.strDecode()).toStrictEqual(messageText);
+  expect(await receiveMessage.strDecode()).toStrictEqual(messageText);
 });
 

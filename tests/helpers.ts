@@ -16,13 +16,13 @@ export const createSession = async (alice: PersonalKeys, bob: PersonalKeys): Pro
   // Alice gets Bob's Ipk and creates a peer then initializes a session
   // Performed by: ALICE
   const alicePeer = await PrismCreatePeer(bob.Ipk);
-  const aliceSessionInit = await PrismInitializeSession(alice, alicePeer);
+  const aliceSessionInit = await PrismInitializeSession();
 
   // Alice sends her session pk bob.
   // Bob then generates his own session, generates shared keys, replies with his session pk.
   // Performed by BOB
   const bobPeer = await PrismCreatePeer(alice.Ipk);
-  const bobSessionInit = await PrismInitializeSession(bob, bobPeer);
+  const bobSessionInit = await PrismInitializeSession();
   const bobSession = await PrismRecipientExchangeSession(bobSessionInit, aliceSessionInit.pk);
 
   // Bob replies to Alice with his session pk,

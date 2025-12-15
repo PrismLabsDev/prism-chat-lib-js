@@ -44,16 +44,11 @@ export const createPeer = async (
   }
 }
 
-export const initializeSession = async (
-  user: PersonalKeys,
-  peer: PeerKeys
-): Promise<SessionInit> => {
+export const initializeSession = async (): Promise<SessionInit> => {
 
   const { pk: Spk, sk: Ssk } = await PrismUtil.createSessionKeyPair();
 
   return {
-    personalKeys: user,
-    peerKeys: peer,
     pk: Spk,
     sk: Ssk,
     tx: undefined,
@@ -74,8 +69,6 @@ export const recipientExchangeSession = async (
   );
 
   return {
-    personalKeys: partialSession.personalKeys,
-    peerKeys: partialSession.peerKeys,
     pk: partialSession.pk,
     sk: partialSession.sk,
     tx: tx,
@@ -96,8 +89,6 @@ export const senderExchangeSession = async (
   );
 
   return {
-    personalKeys: partialSession.personalKeys,
-    peerKeys: partialSession.peerKeys,
     pk: partialSession.pk,
     sk: partialSession.sk,
     tx: tx,
@@ -109,6 +100,8 @@ export const senderExchangeSession = async (
 // Send message skipping session symmetric encryption (usually for establishing a session)
 export const sendUnencrypted = async (
   session: SessionInit,
+  personalKeys: PersonalKeys,
+  peerKeys: PeerKeys,
   data: Uint8Array | string | object,
   type: string,
 ): Promise<{
@@ -119,8 +112,8 @@ export const sendUnencrypted = async (
   // Message builder up
   const message: Message = await Message.create(data);
   const encryptedMessage: EncryptedMessage = await message.encrypt(type);
-  const package_: Package = await encryptedMessage.pack(session.personalKeys.Ipk, session.personalKeys.Isk);
-  const sealedPackage: SealedPackage = await package_.seal(session.peerKeys.Epk);
+  const package_: Package = await encryptedMessage.pack(personalKeys.Ipk, personalKeys.Isk);
+  const sealedPackage: SealedPackage = await package_.seal(peerKeys.Epk);
 
   // Return updated session, message buiulder state, and payload data (raw Uint8Array to send)
   return {
@@ -138,6 +131,8 @@ export const sendUnencrypted = async (
 // Exchange keys
 export const send = async (
   session: Session,
+  personalKeys: PersonalKeys,
+  peerKeys: PeerKeys,
   data: Uint8Array | string | object,
   type: string,
   count: number | undefined = undefined
@@ -159,8 +154,8 @@ export const send = async (
   // Message builder up
   const message: Message = await Message.create(data);
   const encryptedMessage: EncryptedMessage = await message.encrypt(type, derivedTxKey, session.tx_count);
-  const package_: Package = await encryptedMessage.pack(session.personalKeys.Ipk, session.personalKeys.Isk);
-  const sealedPackage: SealedPackage = await package_.seal(session.peerKeys.Epk);
+  const package_: Package = await encryptedMessage.pack(personalKeys.Ipk, personalKeys.Isk);
+  const sealedPackage: SealedPackage = await package_.seal(peerKeys.Epk);
 
   // Return updated session, message buiulder state, and payload data (raw Uint8Array to send)
   return {

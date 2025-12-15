@@ -33,8 +33,6 @@ export type PeerKeys = {
 }
 
 export type SessionInit = {
-  personalKeys: PersonalKeys;
-  peerKeys: PeerKeys;
   pk: Uint8Array;
   sk: Uint8Array;
   tx: Uint8Array | undefined;
@@ -43,8 +41,6 @@ export type SessionInit = {
 }
 
 export type Session = {
-  personalKeys: PersonalKeys;
-  peerKeys: PeerKeys;
   pk: Uint8Array;
   sk: Uint8Array;
   tx: Uint8Array;
@@ -54,10 +50,10 @@ export type Session = {
 
 export type ReceiveOpenPayload = {
   layer: {
-    sealedPackage: SealedPackage;
-    package: Package;
-    encryptedMessage: EncryptedMessage;
     message: undefined;
+    encryptedMessage: EncryptedMessage;
+    package: Package;
+    sealedPackage: SealedPackage;
   }
   type: string,
   timestamp: number,

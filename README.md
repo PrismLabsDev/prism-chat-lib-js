@@ -90,7 +90,7 @@ const bobPublicKey: Uint8Array; // Assume already initialized
 const alice: PersonalKeys; // Assume already initialized
 
 const alicePeer: PeerKeys = await createPeer(bobPublicKey); // Alice generates a set of peer keys from Bob's public key
-const aliceSessionInit: SessionInit = await initializeSession(alice, alicePeer); // Alice initializes a session
+const aliceSessionInit: SessionInit = await initializeSession(); // Alice initializes a session
 
 const sendToBob: Uint8Array = aliceSessionInit.pk; // This message type is called "ic"" (initial communication)
 
@@ -100,7 +100,7 @@ const alicePublicKey: Uint8Array; // Known when opening the message payload (in 
 const bob: PersonalKeys; // Assume already initialized
 
 const bobPeer: PeerKeys = await createPeer(alicePublicKey); // Generate peer from now known sender
-const bobSessionInit: SessionInit = await initializeSession(bob, bobPeer); // Generate initial session object
+const bobSessionInit: SessionInit = await initializeSession(); // Generate initial session object
 const bobSession: Session = await recipientExchangeSession(bobSessionInit, sendToBob); // Combine initial session with Alice sent session pk to create full session (shared tx & rx)
 
 const sendToAlice: Uint8Array = bobSession.pk; // Also works with bobSessionInit.pk This message type is "rc" (response communication)
@@ -158,6 +158,8 @@ const unpackedIC: Uint8Array[] = PrismUtil.unpack(packedIC);
 // Alice send
 const messageUnencrypted = await sendUnencrypted(
   aliceSessionInit, // SessionInit
+  alice,            // Alice PersonalKeys
+  peer,             // PeerKeys
   packedIC,         // payload data
   "ic"              // Message type string
 );
@@ -173,6 +175,8 @@ const received: Uint8Array = receiveUnencryptedDecrypted.data;
 // Alice send
 const messageEncrypted = await send(
   aliceSession,   // Session
+  alice,          // Alice PersonalKeys
+  peer,           // PeerKeys
   "Hello World!", // payload data
   "t"             // Message type string
 );

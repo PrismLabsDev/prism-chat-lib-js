@@ -50,7 +50,7 @@ test("Package Up Down", async (): Promise<void> => {
   // Alice Send
   const sendMessage: PrismMB.Message = await PrismMB.Message.create(messageText);
   const sendEncryptedMessage: PrismMB.EncryptedMessage = await sendMessage.encrypt("a", aliceSession.tx, aliceSession.tx_count);
-  const sendPackage: PrismMB.Package = await sendEncryptedMessage.pack(aliceSession.personalKeys.Ipk, aliceSession.personalKeys.Isk);
+  const sendPackage: PrismMB.Package = await sendEncryptedMessage.pack(alice.Ipk, alice.Isk);
   const sendPackageSerialized: Uint8Array = await sendPackage.serialize();
 
   // Bob Receive
@@ -67,12 +67,12 @@ test("SealedPackage Up Down", async (): Promise<void> => {
   // Alice Send
   const sendMessage: PrismMB.Message = await PrismMB.Message.create(messageText);
   const sendEncryptedMessage: PrismMB.EncryptedMessage = await sendMessage.encrypt("a", aliceSession.tx, aliceSession.tx_count);
-  const sendPackage: PrismMB.Package = await sendEncryptedMessage.pack(aliceSession.personalKeys.Ipk, aliceSession.personalKeys.Isk);
-  const sendSealedPackage: PrismMB.SealedPackage = await sendPackage.seal(aliceSession.peerKeys.Epk);
+  const sendPackage: PrismMB.Package = await sendEncryptedMessage.pack(alice.Ipk, alice.Isk);
+  const sendSealedPackage: PrismMB.SealedPackage = await sendPackage.seal(bob.Epk);
 
   // Bob Receive
   const receiveSealedPackage: PrismMB.SealedPackage = new PrismMB.SealedPackage(sendSealedPackage.data);
-  const receivePackage: PrismMB.Package = await receiveSealedPackage.unseal(bobSession.personalKeys.Epk, bobSession.personalKeys.Esk);
+  const receivePackage: PrismMB.Package = await receiveSealedPackage.unseal(bob.Epk, bob.Esk);
   const receiveEncryptedMessage: PrismMB.EncryptedMessage = await receivePackage.unpack();
   const receiveMessage: PrismMB.Message = await receiveEncryptedMessage.decrypt(bobSession.rx);
 

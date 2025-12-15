@@ -77,10 +77,10 @@ test("Symmetric encrypt and decrypt", async (): Promise<void> => {
 test("Signature verification", async (): Promise<void> => {
   // Alice sign data
   const message: Uint8Array = await PrismUtil.fromString("Hello World!");
-  const cipher: Uint8Array = await PrismUtil.publicEncrypt(message, aliceSession.peerKeys.Epk);
+  const cipher: Uint8Array = await PrismUtil.publicEncrypt(message, bob.Epk);
 
   // Decrypt
-  const data: Uint8Array = await PrismUtil.publicDecrypt(cipher, bobSession.personalKeys.Epk, bobSession.personalKeys.Esk);
+  const data: Uint8Array = await PrismUtil.publicDecrypt(cipher, bob.Epk, bob.Esk);
 
   expect(data).toStrictEqual(message);
 });

@@ -60,7 +60,7 @@ test("Send & receive message.", async (): Promise<void> => {
   const messageStr = "Hello World!";
 
   // Send
-  const sendObj = await PrismSend(aliceSession, messageStr, "m");
+  const sendObj = await PrismSend(aliceSession, alice, bob, messageStr, "m");
   aliceSession = sendObj.session;
 
   const sendToBob = sendObj.data;
@@ -79,7 +79,7 @@ test("Send & receive message unencrypted.", async (): Promise<void> => {
   const messageStr = "Hello World!";
 
   // Send
-  const sendObj = await PrismSendUnencrypted(aliceSession, messageStr, "m");
+  const sendObj = await PrismSendUnencrypted(aliceSession, alice, bob, messageStr, "m");
   const sendToBob = sendObj.data;
 
   // Receive
@@ -99,7 +99,7 @@ test("Create shared session.", async (): Promise<void> => {
   // Performed by: ALICE
   // Known: Bob Ipk
   const alicePeer = await PrismCreatePeer(bob.Ipk);
-  const aliceSessionInit = await PrismInitializeSession(alice, alicePeer);
+  const aliceSessionInit = await PrismInitializeSession();
 
   const payloadIC: any = PrismUtil.pack([
     aliceSessionInit.pk,
@@ -109,6 +109,8 @@ test("Create shared session.", async (): Promise<void> => {
 
   const aliceSendIC = await PrismSendUnencrypted(
     aliceSessionInit,
+    alice,
+    alicePeer,
     payloadIC,
     "ic"
   );
@@ -133,7 +135,7 @@ test("Create shared session.", async (): Promise<void> => {
   expect(await PrismUtil.toString(payloadReadIC[2])).toEqual("Let's chat.");
 
   const bobPeer = await PrismCreatePeer(bobReceiveICDecrypted.sender);
-  const bobSessionInit = await PrismInitializeSession(bob, bobPeer);
+  const bobSessionInit = await PrismInitializeSession();
   bobSession = await PrismRecipientExchangeSession(bobSessionInit, payloadReadIC[0]); // Reset helper bobSession.
 
   const payloadRC: any = PrismUtil.pack([
@@ -144,6 +146,8 @@ test("Create shared session.", async (): Promise<void> => {
 
   const bobSendRC = await PrismSendUnencrypted(
     bobSession,
+    bob,
+    alice,
     payloadRC,
     "rc"
   );

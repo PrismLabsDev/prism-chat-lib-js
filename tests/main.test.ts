@@ -44,7 +44,7 @@ test("Send and Receive high level operations.", async (): Promise<void> => {
     session: sendSession,
     layer: sendLayer,
     data: sendData
-  } = await PrismSend(aliceSession, messageText, "a");
+  } = await PrismSend(aliceSession, alice, bob, messageText, "a");
   aliceSession = sendSession;
 
   // Must open first to know ender Ipk
@@ -65,7 +65,7 @@ test("Send and Receive high level operations skip encryption layer (For IC & RC)
     session: sendSession,
     layer: sendLayer,
     data: sendData
-  } = await PrismSend(aliceSession, messageText, "IC");
+  } = await PrismSend(aliceSession, alice, bob, messageText, "IC");
   aliceSession = sendSession;
 
   // Must open first to know ender Ipk
@@ -91,21 +91,21 @@ test("Send and Receive high level operations message stream.", async (): Promise
     session: sendSession1,
     layer: sendLayer1,
     data: sendData1
-  } = await PrismSend(aliceSession, messages[0], "a");
+  } = await PrismSend(aliceSession, alice, bob, messages[0], "a");
   aliceSession = sendSession1;
 
   const {
     session: sendSession2,
     layer: sendLayer2,
     data: sendData2
-  } = await PrismSend(aliceSession, messages[1], "a");
+  } = await PrismSend(aliceSession, alice, bob, messages[1], "a");
   aliceSession = sendSession2;
 
   const {
     session: sendSession3,
     layer: sendLayer3,
     data: sendData3
-  } = await PrismSend(aliceSession, messages[2], "a");
+  } = await PrismSend(aliceSession, alice, bob, messages[2], "a");
   aliceSession = sendSession3;
 
   // Receive stream of 3 messages
@@ -152,21 +152,21 @@ test("Send and Receive high level operations message stream skip encryption laye
     session: sendSession1,
     layer: sendLayer1,
     data: sendData1
-  } = await PrismSend(aliceSession, messages[0], "a");
+  } = await PrismSend(aliceSession, alice, bob, messages[0], "a");
   aliceSession = sendSession1;
 
   const {
     session: sendSession2,
     layer: sendLayer2,
     data: sendData2
-  } = await PrismSend(aliceSession, messages[1], "a");
+  } = await PrismSend(aliceSession, alice, bob, messages[1], "a");
   aliceSession = sendSession2;
 
   const {
     session: sendSession3,
     layer: sendLayer3,
     data: sendData3
-  } = await PrismSend(aliceSession, messages[2], "a");
+  } = await PrismSend(aliceSession, alice, bob, messages[2], "a");
   aliceSession = sendSession3;
 
   // Receive stream of 3 messages
